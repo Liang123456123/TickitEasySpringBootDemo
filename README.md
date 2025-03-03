@@ -1,4 +1,6 @@
 # TickitEasySpringBootDemo
+<img width="712" alt="專案logo" src="https://github.com/user-attachments/assets/11bedc99-5495-4925-9716-8ff9296e17f1" />
+
 ![TickitEasy](./images/logo/logoWithText.svg)
 ### TickitEasy：SpringBoot 開發版本  
 EEIT87 第三組 專題
