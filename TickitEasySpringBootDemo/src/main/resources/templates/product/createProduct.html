@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta th:replace="~{commons/adminHead}">
+    <!-- 新增 FilePond CSS -->
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+ /* 隱藏 PQINA 連結 */
+  .filepond--credits {
+    display: none !important;
+  }
+ /* 覆蓋 FilePond 預設樣式 */
+.filepond--item {
+    width: calc(33.33% - 0.5em); /* 設定每個圖片的寬度 */
+    height: auto; /* 允許高度自適應 */
+}
+
+/* 自訂已存在的圖片樣式 */
+.existing-photo {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.existing-photo img {
+    max-width: 200px; /* 最大寬度為 200px */
+    max-height: 200px; /* 最大高度為 200px */
+    width: auto; /* 確保圖片不超出範圍 */
+    height: auto; /* 確保圖片不超出範圍 */
+}
+
+
+/* 刪除圖片按鈕樣式 */
+.delete-photo {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 18px;
+    line-height: 25px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-primary {
+    margin-right: 0.5rem; /* 添加右邊距 */
+}
+
+  
+</style>
+    <title>新增商品</title>
+</head>
+
+<body>
+    <div th:replace="~{commons/adminHeader}"></div>
+
+    <div class="container">
+        <h1>新增商品</h1>
+
+        <form id="addProductForm" enctype="multipart/form-data">
+            <table class="table display">
+                <tr>
+                    <th><span class="mustMark">*</span>商品名稱</th>
+                    <td><input type="text" class="form-control" name="productName" required></td>
+                </tr>
+                <tr>
+                    <th>商品主圖</th>
+                    <td>
+                        <input type="file" class="form-control" name="imageFile" accept="image/*">
+                        <div id="imagePreviewContainer" class="mt-2"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><span class="mustMark">*</span>商品類別</th>
+                    <td>
+                        <select class="form-select" name="categoryId">
+                            <option value="">（未選擇）</option>
+                            <th:block th:each="category : ${categoryList}">
+                                <option th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
+                            </th:block>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>商品標籤</th>
+                    <td>
+                        <select class="form-select" name="tagId">
+                            <option value="">（未選擇）</option>
+                            <th:block th:each="tag : ${tagList}">
+                                <option th:value="${tag.tagId}" th:text="${tag.tagName}"></option>
+                            </th:block>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>商品描述</th>
+                    <td><textarea class="form-control" name="productDesc" rows="4"></textarea></td>
+                </tr>
+                <tr>
+                    <th><span class="mustMark">*</span>價格</th>
+                    <td><input type="number" class="form-control" name="price" required min="0"></td>
+                </tr>
+                <tr>
+                    <th><span class="mustMark">*</span>庫存</th>
+                    <td><input type="number" class="form-control" name="stock" required min="0"></td>
+                </tr>
+                
+                <tr>
+                    <th>商品副圖</th>
+                    <td>
+                        <input type="file" id="productDetailPics" name="productDetailPics" multiple accept="image/*">
+                    </td>
+                </tr>
+
+
+            </table>
+
+            <div id="action-buttons" class="d-flex mb-3">
+                <div id="result" class="d-flex align-items-center me-3"></div>
+                <button type="submit" id="addProductBtn" class="btn btn-primary">新增</button>
+                <button type="button" class="btn btn-secondary me-2"
+                    onclick="location.href='/TickitEasy/admin/product'">返回商品列表</button>
+                <button type="button" id="autofillBtn" class="btn btn-warning">
+    				一鍵輸入
+				</button>
+            </div>
+        </form>
+    </div>
+
+    <div th:replace="~{commons/adminFooter}"></div>
+
+    <!-- 添加 FilePond JS -->
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const addProductForm = document.getElementById('addProductForm');
+            const addProductBtn = document.getElementById('addProductBtn');
+
+            // 註冊 FilePond 
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+
+            // 初始化 FilePond
+            const pond = FilePond.create(document.querySelector('input[name="productDetailPics"]'), {
+                allowMultiple: true,
+                maxFiles: 4,
+                acceptedFileTypes: ['image/*'],
+                labelIdle: '拖曳或 <span class="filepond--label-action">點擊此處上傳圖片</span>',
+                labelFileCountSingular: '個圖片',
+                labelFileCountPlural: '個圖片',
+                labelFileLoading: '加載中',
+                labelFileAdded: '已新增',
+                labelFileLoadError: '加載失敗',
+                labelTapToCancel: '點擊取消',
+                labelTapToRetry: '點擊重試',
+                labelTapToUndo: '點擊撤銷',
+            });
+
+            addProductForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                addProductBtn.disabled = true;
+
+                const formData = new FormData(addProductForm);
+
+                // 新增商品
+                axios.post('/TickitEasy/admin/api/product', formData)
+                    .then(response => {
+                        const productID = response.data.productID;
+
+                        // 上傳商品副圖
+                        const files = pond.getFiles();
+                        const uploadPromises = files.map(fileItem => {
+                            const picFormData = new FormData();
+                            picFormData.append('fileName', fileItem.file);
+
+                            return axios.post(`/TickitEasy/admin/api/productPhoto/${productID}`, picFormData, {
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            });
+                        });
+
+                        return Promise.all(uploadPromises);
+                    })
+                    .then(() => {
+                        // 使用 SweetAlert2 提示成功
+            Swal.fire({
+                position: 'center',
+                icon: "success",
+                title: "商品新增成功",
+                showConfirmButton: false,
+                timer: 1500
+            });
+                        // 重置表單
+                        addProductForm.reset();
+                        pond.removeFiles();
+                        imagePreviewContainer.innerHTML = ''; // 清除商品主圖預覽
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('新增失敗，請稍後再試。');
+                    })
+                    .finally(() => {
+                        addProductBtn.disabled = false;
+                    });
+            });
+        });
+        
+        // 圖片預覽
+            document.querySelector('input[name="imageFile"]').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail mt-2';
+                        img.style.maxWidth = '200px';
+                        const container = document.getElementById('imagePreviewContainer');
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+
+    // 示範輸入
+			document.getElementById("autofillBtn").addEventListener("click", function () {
+				document.getElementsByName("productName")[0].value = "你的名字";
+				document.getElementsByName("productDesc")[0].value = "你的名字小說周邊商品";
+				document.getElementsByName("categoryId")[0].value = "3";
+				document.getElementsByName("tagId")[0].value = "5";
+				document.getElementsByName("price")[0].value = "200";
+				document.getElementsByName("stock")[0].value = "100";
+			});
+    
+
+    </script>
+</body>
+
+</html>
