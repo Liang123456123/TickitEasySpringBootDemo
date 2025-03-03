@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <script th:src="@{/event/js/utils.js}"></script>
+
+    <!-- 引入共用的 Head -->
+    <meta th:replace="~{commons/userHead}">
+
+    <title>TickitEasy - 首頁</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/logo/LogoColor.svg}">
+
+    <!-- 引入 Bootstrap 和其他樣式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/TickitEasy/cwdfunding/css/indexCard.css" />
+
+    <style>
+        body {
+            background-color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .text-main-blue-purple {
+            color: #5F46E8;
+        }
+
+        .btn-main-bright-orange {
+            background-color: #FFB44D;
+            border-color: #FFB44D;
+            color: #fff;
+        }
+
+        .btn-main-bright-orange:hover {
+            background-color: #F5BE74;
+            border-color: #F5BE74;
+            color: #fff;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            object-fit: contain;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            margin-top: 40px;
+            color: #5F46E8;
+            text-align: center;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card img {
+            object-fit: cover;
+            height: 200px;
+        }
+
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        /* 調整輪播左右按鈕的顏色 */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: #FFB44D;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+        }
+
+        .carousel-control-prev-icon:hover,
+        .carousel-control-next-icon:hover {
+            background-color: #F5BE74;
+        }
+
+        .carousel-control-prev-icon::after,
+        .carousel-control-next-icon::after {
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        /* custom-card */
+        .custom-card {
+            width: 360px;
+            height: 322px;
+            text-decoration: none;
+            /* 去除超連結下劃線 */
+            transition: box-shadow 0.3s ease;
+            /* 添加過渡效果 */
+        }
+
+        .custom-card:hover {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            /* 減輕的懸停陰影效果 */
+        }
+
+        /* 輪播圖片比例 */
+        .ratio-3x1 {
+            --bs-aspect-ratio: 33%;
+            /* 3 x 1 */
+        }
+
+        .carousel-caption h5,
+        .carousel-caption p {
+            text-shadow: rgb(66, 66, 66) 0em 0em 0.6em;
+        }
+
+        .navbar {
+            padding: 0 !important;
+        }
+
+        .nav-item {
+            padding-top: 16px;
+            padding-bottom: 10px;
+            padding-left: 8px;
+            padding-right: 8px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+            /* 使絕對定位的元素相對於 nav-item */
+            border-bottom: 3px solid #5F46E8;
+
+        }
+
+        /* 偽元素來顯示底線 */
+        .nav-item.index::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #5F46E8;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+
+            // 處理活動時間顯示
+            const eventStartTimeElements = document.getElementsByClassName("event-start-time");
+            [...eventStartTimeElements].forEach(element => {
+                const originalDateTimeString = element.textContent;
+                const formattedDateTimeString = dateFormat(originalDateTimeString);
+                element.textContent = formattedDateTimeString;
+            });
+            const eventEndTimeElements = document.getElementsByClassName("event-end-time");
+            [...eventEndTimeElements].forEach(element => {
+                const originalDateTimeString = element.textContent;
+                const formattedDateTimeString = dateFormat(originalDateTimeString);
+                element.textContent = formattedDateTimeString;
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <!-- 引入共用的 Header -->
+    <div th:replace="~{commons/userHeader}"></div>
+
+    <!-- Hero 廣告輪播 -->
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="ratio ratio-3x1">
+                    <img src="https://i.imgur.com/i7TIYie.png" class="d-block w-100 object-fit-cover" alt="拒買黃牛票">
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>拒絕黃牛</h5>
+                    <p>從你我開始做起</p>
+                    <a href="#" class="btn btn-main-bright-orange">立即了解</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="ratio ratio-3x1">
+                    <img src="http://localhost:8080/TickitEasy/images/event/13_004644bf-fbac-4681-9142-a702ac209053.jpg"
+                        class="d-block w-100 object-fit-cover" alt="POP! POP! POP! 流行音樂互動展 ＠ 高雄流行音樂中心">
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>POP! POP! POP! 流行音樂互動展 ＠ 高雄流行音樂中心</h5>
+                    <p>2022年3月1日～2024年12月31日 高雄流行音樂中心</p>
+                    <a href="http://localhost:8080/TickitEasy/event/13" class="btn btn-main-bright-orange">立即了解</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="ratio ratio-3x1">
+                    <img src="http://localhost:8080/TickitEasy/images/event/21_c12ae676-f8cc-46bd-b591-8fc97199cc71.jpg"
+                        class="d-block w-100 object-fit-cover" alt="克蘇魯的呼喚 - 主題劇本活動【白城風雲】">
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>克蘇魯的呼喚 - 主題劇本活動【白城風雲】</h5>
+                    <p>2024年11月9日 GrowLife靠過來桌遊咖啡廳</p>
+                    <a href="http://localhost:8080/TickitEasy/event/21" class="btn btn-main-bright-orange">立即了解</a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- 熱門活動 Section -->
+    <div class="container mt-5">
+        <h2 class="section-title">熱門活動</h2>
+        <div class="row row-cols-1 row-cols-md-3 mt-4">
+            <th:block th:each="event: ${topEvents}">
+                <!-- 活動卡片 -->
+                <div class="col d-flex justify-content-center mb-3">
+                    <a class="card h-100 custom-card" th:href="@{/event/{id}(id=${event.eventID})}">
+                        <div class="ratio ratio-16x9">
+                            <img th:if="${event.eventPic != null}" class="card-img-top object-fit-cover"
+                                th:src="@{${event.eventPic}}" alt="..." />
+                            <img th:unless="${event.eventPic != null}" class="card-img-top object-fit-cover"
+                                th:src="@{/images/event/EventPicDefault.png}" alt="..." />
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title fw-semibold fs-5">[[${event.eventName}]]</div>
+                            <div>
+                                <span class="city">[[${event.address.substring(0, 2)}]]</span>
+                                <span th:if="${event.place != null}" class="ms-3 place">[[${event.place}]]</span>
+                            </div>
+                            <div class="mt-2 fs-6">
+                                <span class="event-start-time">[[${event.eventStartTime}]]</span>
+                                <span class="ms-1">～</span><br>
+                                <span class="event-end-time">[[${event.eventEndTime}]]</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-flex justify-content-around">
+                                <span
+                                    class="category badge bg-main-blue-purple fw-normal fs-6">[[${event.eventCategory.categoryName}]]</span>
+                                <span th:if="${event.eventTag != null}"
+                                    class="tag badge bg-main-bright-orange fw-normal fs-6">[[${event.eventTag.tagName}]]</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+    <!-- 募資專案 Section -->
+    <div class="container mt-5">
+        <h2 class="section-title">募資專案</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card custom-letter-spacing">
+                    <img th:src="@{/images/cwdfunding/music_journey.jpg}" class="card-img-top" alt="募資圖片">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold custom-title-text">《音樂之旅》專輯製作</h5>
+                        <p class="card-text d-inline-block text-truncate" style="max-width: 300px;">
+                            邀請大家一起回顧經典電影，每周一次，帶你重溫影史上不朽的作品。</p>
+                        <a th:href="@{/fundprojects/6}" class="btn btn-main-bright-orange">支持專案</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card custom-letter-spacing">
+                    <img th:src="@{/images/cwdfunding/time_moment.jpg}" class="card-img-top" alt="募資圖片">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold custom-title-text">《時光的印記》攝影展
+                        </h5>
+                        <p class="card-text d-inline-block text-truncate" style="max-width: 300px;">
+                            《時光的印記》攝影展展出捕捉瞬間的藝術作品，記錄時間流逝中的美好景象，帶給觀眾深刻的視覺體驗。</p>
+                        <a th:href="@{/fundprojects/8}" class="btn btn-main-bright-orange">支持專案</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card custom-letter-spacing">
+                    <img th:src="@{/images/cwdfunding/future_art.jpg}"
+                    class="card-img-top" alt="募資圖片">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold custom-title-text">未來藝術展覽</h5>
+                        <p class="card-text d-inline-block text-truncate" style="max-width: 300px;">
+                            「未來藝術展覽」匯集了最新的科技藝術作品，展示前沿藝術與科技的完美結合，邀請了多位知名藝術家共同參展。</p>
+                        <a th:href="@{/fundprojects/3}" class="btn btn-main-bright-orange">支持專案</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger chat-icon="https:&#x2F;&#x2F;i.imgur.com&#x2F;gFJ0oHt.png" intent="WELCOME" chat-title="TickitEasy"
+        agent-id="f558d375-2bb2-45eb-b833-0ef9a01652da" language-code="zh-tw"></df-messenger>
+
+    <!-- 頁腳 -->
+    <div th:replace="~{commons/userFooter}"></div>
+</body>
+
+</html>

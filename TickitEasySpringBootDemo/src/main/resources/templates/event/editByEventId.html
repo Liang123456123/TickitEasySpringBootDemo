@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta th:replace="~{commons/adminHead}">
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<!-- summernote include -->
+	<!-- jQuery -->
+	<!-- Bootstrap 5 -->
+	<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.1/dist/summernote-bs5.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.1/dist/summernote-bs5.min.css" rel="stylesheet">
+
+	<title>活動詳情</title>
+	<style>
+		table>tbody>tr>th {
+			width: 120px;
+			min-width: 120px;
+			text-align: right;
+			vertical-align: middle;
+		}
+		table>tbody>tr>td {
+			text-align: left;
+			vertical-align: middle;
+		}
+		table>tbody>tr>td img {
+			max-width: 100%;
+			height: auto !important;
+		}
+	</style>
+	<script>
+		$(document).ready(function () {
+
+			// 初始化常數與 function
+			const contextPath = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname.split("/")[1];
+			const currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+			function dateFormat(datetimeString) {
+				const dateObject = new Date(datetimeString);
+				const options = {
+					year: 'numeric',
+					month: 'long', // 使用 'long' 會顯示完整的月份名稱
+					day: 'numeric',
+					hour: '2-digit',
+					minute: '2-digit',
+				};
+				return dateObject.toLocaleString('zh-TW', options);
+			}
+
+
+			// summernote
+			$('#summernote').summernote({
+				placeholder: '活動介紹',
+				tabsize: 4,
+				height: 200,
+				toolbar: [
+					['style', ['bold', 'italic', 'underline', 'clear']],
+					['font', ['strikethrough', 'superscript', 'subscript']],
+					['fontsize', ['fontsize']],
+					['color', ['color']],
+					['para', ['ul', 'ol', 'paragraph']],
+					['insert', ['link', 'picture']],
+					['view', ['fullscreen', 'help']],
+				],
+			});
+			// 將原本的活動介紹放入 summernote
+			function decodeHtml(html) {  // 將 Thymeleaf 傳來 JavaScript 
+				const txt = document.createElement("textarea");
+				txt.innerHTML = html; // 將 HTML 實體編碼賦值
+				return txt.value; // 取得解析後的 HTML
+			}
+			const encodedOriginalEventDesc = '[[${#strings.escapeJavaScript(event.eventDesc)}]]';
+			const decodedOriginalEventDesc = decodeHtml(encodedOriginalEventDesc);
+			if (encodedOriginalEventDesc !== null && !encodedOriginalEventDesc !== "") {
+				$('#summernote').summernote('code', decodedOriginalEventDesc);
+			}
+
+			// EventListener
+			const editForm = document.getElementById("edit-form");
+			const eventID = document.getElementById("event-id").value;
+			const resultDiv = document.getElementById("result");
+			editForm.addEventListener("submit", function(event) {
+				event.preventDefault();
+				resultDiv.innerHTML = `
+					<div class="spinner-border" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>`;
+				resultDiv.classList.remove("text-danger");
+				resultDiv.classList.remove("text-success");
+
+				let formData = new FormData(editForm);
+
+				axios.put(contextPath + "/admin/api/event/" + eventID, formData)
+				.then(res => {
+					console.log(res);
+					if (res.status == 200) {
+						resultDiv.classList.add("text-success");
+						resultDiv.innerText = "編輯成功！";
+						Swal.fire({
+							title: '編輯成功！',
+							icon: 'success',
+						}).then(() => {
+							window.location.href = currentPath.substring(0, currentPath.lastIndexOf("/"));
+						});
+					}
+				})
+				.catch(err => {
+					console.error(err); 
+					if (err.status == 400) {
+						resultDiv.classList.add("text-danger");
+						resultDiv.innerText = err.response.data;
+					}
+				});
+			})
+
+			document.getElementById("cancel").addEventListener("click", function() {
+				window.location.href = currentPath.substring(0, currentPath.lastIndexOf("/"));
+			})
+
+
+			// 設定日期時間欄位最小值
+			const now = new Date();
+			const nowFormattedString = now.toISOString().slice(0, 16);
+			document.querySelectorAll("input[type=datetime-local]").forEach(element => {
+            	element.setAttribute('min', nowFormattedString);
+        	});
+
+			// 預先選中原本的類別和標籤
+			const originalCategoryString = document.getElementById("categoryString").value;
+			document.querySelector(`option[value=${originalCategoryString}]`).selected = true;
+			const originalTagString = document.getElementById("tagString").value;
+			document.querySelector(`option[value=${originalTagString}]`).selected = true;
+		});
+	</script>
+</head>
+
+<body>
+	<div th:replace="~{commons/adminHeader}"></div>
+    
+	<!--  這裡是網頁內容 >-->
+	<div class="container">
+		<h1>編輯活動</h1>
+		<form id="edit-form" enctype="multipart/form-data">
+		<table class="table table-hover" th:unless="${error}">
+			<tbody>
+				<tr>
+					<th>活動編號</th>
+					<td>
+						<input type="text" class="form-control-plaintext" readonly name="eventID" id="event-id" th:value="${event.eventID}">
+					</td>
+				</tr>
+				<tr>
+					<th>狀態</th>
+					<td id="statusTd">
+						<span th:if="${event.status == 0}" id="status" th:data-status="${event.status}" class="d-flex align-items-center text-danger">未上架</span>
+						<span th:if="${event.status == 1}" id="status" th:data-status="${event.status}" class="d-flex align-items-center text-success">已上架</span>
+						<span th:if="${event.status == 2}" id="status" th:data-status="${event.status}" class="d-flex align-items-center text-primary">已啟售</span>
+					</td>
+				</tr>
+				<tr>
+					<th>活動名稱</th>
+					<td>
+						<input type="text" class="form-control-plaintext" readonly th:value="${event.eventName}">
+						<input type="text" class="form-control" name="eventName" placeholder="編輯活動名稱">
+					</td>
+				</tr>
+				<tr>
+					<th>活動主圖</th>
+					<td>
+						<img th:if="${event.eventPic != null}" th:src="@{${event.eventPic}}" th:alt="${event.eventName}" class="mb-2" width=320px>
+						<span th:unless="${event.eventPic != null}"><input type="text" class="form-control-plaintext" readonly value="（無圖片）"></span>
+						<input type="file" class="form-control" name="eventPicFile" accept=".jpg, .jpeg, .png, .gif">
+					</td>
+				</tr>
+				<tr>
+					<th>活動類別</th>
+					<td>
+						<input type="text" class="form-control-plaintext" readonly th:value="${event.eventCategory.categoryName}">
+						<!-- 傳遞 categoryString -->
+						<input type="hidden" id="categoryString" th:value="${event.eventCategory.categoryString}">
+						<select class="form-select" name="categoryString">
+							<option value="">（未選擇）</option>
+							<th:block th:each="category : ${categoryList}">
+								<option th:value="${category.categoryString}">[[${category.categoryName}]]</option>
+							</th:block>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th>活動標籤</th>
+					<td>
+						<input th:if="${event.eventTag != null}" type="text" class="form-control-plaintext" readonly th:value="${event.eventTag.tagName}">
+						<input th:unless="${event.eventTag != null}" type="text" class="form-control-plaintext" readonly th:value="（無標籤）">
+						<!-- 傳遞 tagString -->
+						<input th:if="${event.eventTag != null}" type="hidden" id="tagString" th:value="${event.eventTag.tagString}">
+						<input th:unless="${event.eventTag != null}" type="hidden" id="tagString" value="">
+						<select class="form-select" name="tagString">
+							<option value="">（未選擇）</option>
+							<th:block th:each="tag : ${tagList}">
+								<option th:value="${tag.tagString}">[[${tag.tagName}]]</option>
+							</th:block>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th>活動介紹</th>
+					<td>
+						<!-- <textarea th:if="${event.eventDesc != null}" class="form-control-plaintext" readonly>[[${event.eventDesc}]]</textarea>
+						<textarea th:unless="${event.eventDesc != null}" class="form-control-plaintext" readonly>（無活動介紹）</textarea> -->
+						<textarea class="form-control" name="eventDesc" id="summernote"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<th>地點</th>
+					<td>
+						<input th:if="${event.place != null}" type="text" class="form-control-plaintext" readonly th:value="${event.place}">
+						<input th:unless="${event.place != null}" type="text" class="form-control-plaintext" readonly th:value="（無地點）">
+						<input type="text" class="form-control" name="place" placeholder="編輯地點">
+					</td>
+				</tr>
+				<tr>
+					<th>地址</th>
+					<td>
+						<input type="text" class="form-control-plaintext" readonly th:value="${event.address}">
+						<input type="text" class="form-control" name="address" placeholder="編輯地址">
+					</td>
+				</tr>
+				<tr>
+					<th>活動開始時間</th>
+					<td>
+						<input type="datetime-local" class="form-control-plaintext" readonly th:value="${event.eventStartTime}">
+						<input type="datetime-local" class="form-control" name="eventStartTime" placeholder="編輯活動開始時間">
+					</td>
+				</tr>
+				<tr>
+					<th>活動結束時間</th>
+					<td>
+						<input type="datetime-local" class="form-control-plaintext" readonly th:value="${event.eventEndTime}">
+						<input type="datetime-local" class="form-control" name="eventEndTime" placeholder="編輯活動結束時間">
+					</td>
+				</tr>
+				<tr>
+					<th>開始入場時間</th>
+					<td>
+						<input type="datetime-local" class="form-control-plaintext" readonly th:value="${event.startEntryTime}">
+						<input type="datetime-local" class="form-control" name="startEntryTime" placeholder="編輯開始入場時間">
+					</td>
+				</tr>
+				<tr>
+					<th>結束入場時間</th>
+					<td>
+						<input type="datetime-local" class="form-control-plaintext" readonly th:value="${event.endEntryTime}">
+						<input type="datetime-local" class="form-control" name="endEntryTime" placeholder="編輯結束入場時間">
+					</td>
+				</tr>
+				<tr>
+					<th>可購買總數</th>
+					<td>
+						<input type="number" class="form-control-plaintext" readonly th:value="${event.quantityTotalAvailable}">
+						<input type="number" class="form-control" name="quantityTotalAvailable" placeholder="編輯可購買總數">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div th:if="${error}">未找到此筆活動。</div>
+		<div id="action-buttons" class="d-flex mb-3">
+			<div id="result" class="d-flex align-items-center"></div>
+			<button class="btn btn-secondary ms-auto" type="button" id="cancel">取消</button>
+			<button class="btn btn-primary ms-3" type="submit" id="edit">儲存編輯</button>
+		</div>
+		</form>
+	</div>
+   <div th:replace="~{commons/adminFooter}"></div>
+</body>
+
+</html>
