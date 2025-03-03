@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/1ac26411-ff9a-4f5b-b619-7f29d1ab498b)# TickitEasySpringBootDemo
+# TickitEasySpringBootDemo
 ![TickitEasy](./images/logo/logoWithText.svg)
 ### TickitEasy：SpringBoot 開發版本  
 EEIT87 第三組 專題
