@@ -1,11 +1,24 @@
 # TickitEasySpringBootDemo
 <img width="712" alt="專案logo" src="https://github.com/user-attachments/assets/11bedc99-5495-4925-9716-8ff9296e17f1" />
-
-![TickitEasy](./images/logo/logoWithText.svg)
 ### TickitEasy：SpringBoot 開發版本  
 EEIT87 第三組 專題
 
-## 專案簡介
+## 我的專案功能簡介
+
+### 周邊商品
+- 前台
+    - 周邊商品⾴⾯
+    - 周邊商品推薦
+    - 周邊商品購物⾞
+    - 周邊商品收藏
+    - 寄發商品上架通知(JavaMail)
+- 後台
+    - 周邊商品列表顯⽰（AJAX）
+    - 周邊商品資料管理
+    - 周邊商品圖⽚管理（FilePond）
+    - 商品統計圖表（Chart.js）
+
+### 整組專案簡介
 
 ### 會員
 - 前台
@@ -43,7 +56,7 @@ EEIT87 第三組 專題
     - 周邊商品推薦
     - 周邊商品購物⾞
     - 周邊商品收藏
-    - JavaMail寄發商品上架通知
+    - 寄發商品上架通知(JavaMail)
 - 後台
     - 周邊商品列表顯⽰（AJAX）
     - 周邊商品資料管理
@@ -83,21 +96,3 @@ EEIT87 第三組 專題
     - 募資活動 CRUD
     - 募資列表顯⽰ （AJAX）
     - 分⾴ （Pageable）
-
-## 開發用資訊
-
-### Java 文件
-
-https://eeit87t3.github.io/TickitEasySpringBoot/
-<br>
-
-### 測試網址
-
-1. 資料庫連線  
-http://localhost:8080/TickitEasy/test/connection  
-
-2. 後台模板  
-http://localhost:8080/TickitEasy/test/admin-template  
-
-3. 圖片讀取  
-http://localhost:8080/TickitEasy/images/test/logo.png
