@@ -32,7 +32,7 @@ function renderProductDetail(product) {
     mainThumbnail.onclick = () => changeMainImage(mainThumbnail.src);
     thumbnailsContainer.appendChild(mainThumbnail);
 
-    // 添加其他副圖
+    // 新增其他副圖
     product.detailPhotos.forEach(photo => {
         const img = document.createElement('img');
         img.src = `/TickitEasy${photo}`;
@@ -42,7 +42,7 @@ function renderProductDetail(product) {
         thumbnailsContainer.appendChild(img);
     });
 
-    // 設定商品信息
+    // 設定商品資料
     template.getElementById('productName').textContent = product.productName;
     template.getElementById('productPrice').textContent = product.price;
     template.getElementById('productStock').textContent = product.stock;
@@ -67,7 +67,7 @@ function changeMainImage(src) {
     document.getElementById('mainImage').src = src;
 }
 
-// 推薦商品載入函數
+// 推薦商品載入
 function loadRecommendProducts() {
     axios.get(`/TickitEasy/user/api/product/${productID}/recommend`)
         .then(response => {
@@ -165,34 +165,33 @@ function setNotification() {
             return;
         }
 
-        // 使用 axios 向后端发送 POST 请求
+        // 使用 axios 向後端发送 POST 請求
         axios.post('/TickitEasy/user/api/product', null, {
             params: {
-                productID: productID,  // 使用全局变量 productID
+                productID: productID,  
                 quantity: quantity
             }
         })
         .then(response => {
-            const cartItem = response.data;  // 从后端获取更新后的购物车数据
+            const cartItem = response.data;  // 從後端獲取更新後的購物車數據
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-            // 检查购物车中是否已存在该商品
+            // 檢查購物車中是否已存在該商品
             const existingItemIndex = cart.findIndex(item => item.productID === cartItem.productID);
 
             if (existingItemIndex > -1) {
-                // 更新商品数量
+                // 更新商品數量
                 cart[existingItemIndex].quantity += quantity;
             } else {
-                // 将新商品添加到购物车
+                // 將新商品加到購物車
                 cart.push(cartItem);
             }
 
-            // 更新 localStorage 中的购物车数据
+            // 更新 localStorage 中的購物車資料
             localStorage.setItem('cart', JSON.stringify(cart));
-			console.log('Product ID in addToCart:', productID);  // 再次打印檢查
-            // 判断是跳转到购物车页面还是显示提示信息
+			// 判斷是跳轉到購物車頁面還是顯示提示訊息
             if (buyNow) {
-                window.location.href = '/TickitEasy/user/cart';  // 跳转到购物车页面
+                window.location.href = '/TickitEasy/user/cart';  // 跳轉到購物車頁面
             } 				else {
 				            // 如果是加入購物車，顯示 SweetAlert2 提示訊息
 				            Swal.fire({
