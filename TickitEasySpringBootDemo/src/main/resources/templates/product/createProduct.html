@@ -9,6 +9,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js"></script>
     
     <style>
  /* 隱藏 PQINA 連結 */
@@ -72,7 +73,7 @@
             <table class="table display">
                 <tr>
                     <th><span class="mustMark">*</span>商品名稱</th>
-                    <td><input type="text" class="form-control" name="productName" required></td>
+                    <td><input type="text" class="form-control" name="productName" ></td>
                 </tr>
                 <tr>
                     <th>商品主圖</th>
@@ -109,11 +110,11 @@
                 </tr>
                 <tr>
                     <th><span class="mustMark">*</span>價格</th>
-                    <td><input type="number" class="form-control" name="price" required min="0"></td>
+                    <td><input type="number" class="form-control" name="price"  min="0"></td>
                 </tr>
                 <tr>
                     <th><span class="mustMark">*</span>庫存</th>
-                    <td><input type="number" class="form-control" name="stock" required min="0"></td>
+                    <td><input type="number" class="form-control" name="stock"  min="0"></td>
                 </tr>
                 
                 <tr>
@@ -146,110 +147,162 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            const addProductForm = document.getElementById('addProductForm');
-            const addProductBtn = document.getElementById('addProductBtn');
+    document.addEventListener('DOMContentLoaded', function () {
+        const addProductForm = document.getElementById('addProductForm');
+        const addProductBtn = document.getElementById('addProductBtn');
 
-            // 註冊 FilePond 
-            FilePond.registerPlugin(FilePondPluginImagePreview);
+        // 註冊 FilePond 
+        FilePond.registerPlugin(FilePondPluginImagePreview);
 
-            // 初始化 FilePond
-            const pond = FilePond.create(document.querySelector('input[name="productDetailPics"]'), {
-                allowMultiple: true,
-                maxFiles: 4,
-                acceptedFileTypes: ['image/*'],
-                labelIdle: '拖曳或 <span class="filepond--label-action">點擊此處上傳圖片</span>',
-                labelFileCountSingular: '個圖片',
-                labelFileCountPlural: '個圖片',
-                labelFileLoading: '加載中',
-                labelFileAdded: '已新增',
-                labelFileLoadError: '加載失敗',
-                labelTapToCancel: '點擊取消',
-                labelTapToRetry: '點擊重試',
-                labelTapToUndo: '點擊撤銷',
-            });
-
-            addProductForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                addProductBtn.disabled = true;
-
-                const formData = new FormData(addProductForm);
-
-                // 新增商品
-                axios.post('/TickitEasy/admin/api/product', formData)
-                    .then(response => {
-                        const productID = response.data.productID;
-
-                        // 上傳商品副圖
-                        const files = pond.getFiles();
-                        const uploadPromises = files.map(fileItem => {
-                            const picFormData = new FormData();
-                            picFormData.append('fileName', fileItem.file);
-
-                            return axios.post(`/TickitEasy/admin/api/productPhoto/${productID}`, picFormData, {
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            });
-                        });
-
-                        return Promise.all(uploadPromises);
-                    })
-                    .then(() => {
-                        // 使用 SweetAlert2 提示成功
-            Swal.fire({
-                position: 'center',
-                icon: "success",
-                title: "商品新增成功",
-                showConfirmButton: false,
-                timer: 1500
-            });
-                        // 重置表單
-                        addProductForm.reset();
-                        pond.removeFiles();
-                        imagePreviewContainer.innerHTML = ''; // 清除商品主圖預覽
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('新增失敗，請稍後再試。');
-                    })
-                    .finally(() => {
-                        addProductBtn.disabled = false;
-                    });
-            });
+        // 初始化 FilePond
+        const pond = FilePond.create(document.querySelector('input[name="productDetailPics"]'), {
+            allowMultiple: true,
+            maxFiles: 4,
+            acceptedFileTypes: ['image/*'],
+            labelIdle: '拖曳或 <span class="filepond--label-action">點擊此處上傳圖片</span>',
+            labelFileCountSingular: '個圖片',
+            labelFileCountPlural: '個圖片',
+            labelFileLoading: '加載中',
+            labelFileAdded: '已新增',
+            labelFileLoadError: '加載失敗',
+            labelTapToCancel: '點擊取消',
+            labelTapToRetry: '點擊重試',
+            labelTapToUndo: '點擊撤銷',
         });
-        
-        // 圖片預覽
-            document.querySelector('input[name="imageFile"]').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'img-thumbnail mt-2';
-                        img.style.maxWidth = '200px';
-                        const container = document.getElementById('imagePreviewContainer');
-                        container.innerHTML = '';
-                        container.appendChild(img);
-                    }
-                    reader.readAsDataURL(file);
+
+        // Validate.js 表單驗證
+        const constraints = {
+            productName: {
+                presence: { allowEmpty: false, message: "請填寫商品名稱" }
+            },
+            categoryId: {
+                presence: { message: "請選擇商品類別" },
+                exclusion: {
+                    within: [""], 
+                    message: "請選擇商品類別"
                 }
-            });
-            
+            },
+            price: {
+                presence: { message: "請輸入價格" },
+                numericality: {
+                    greaterThan: 0,
+                    message: "價格必須填寫並且數字大於 0"
+                }
+            },
+            stock: {
+                presence: { message: "請輸入庫存" },
+                numericality: {
+                    greaterThanOrEqualTo: 0, // 改成「大於等於 0」
+        			message: "庫存必須填寫並且數字大於或等於 0"
+                }
+            }
+        };
 
-    // 示範輸入
-			document.getElementById("autofillBtn").addEventListener("click", function () {
-				document.getElementsByName("productName")[0].value = "你的名字";
-				document.getElementsByName("productDesc")[0].value = "你的名字小說周邊商品";
-				document.getElementsByName("categoryId")[0].value = "3";
-				document.getElementsByName("tagId")[0].value = "5";
-				document.getElementsByName("price")[0].value = "200";
-				document.getElementsByName("stock")[0].value = "100";
-			});
-    
+        function showErrors(errors) {
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
 
-    </script>
+            for (let key in errors) {
+                let field = document.querySelector(`[name="${key}"]`);
+                if (field) {
+                    let errorMessage = document.createElement("span");
+                    errorMessage.className = "error-message text-danger";
+                    errorMessage.innerText = errors[key][0];
+                    field.parentNode.appendChild(errorMessage);
+                }
+            }
+        }
+
+        function submitForm() {
+            addProductBtn.disabled = true;
+            const formData = new FormData(addProductForm);
+
+            axios.post('/TickitEasy/admin/api/product', formData)
+                .then(response => {
+                    const productID = response.data.productID;
+                    const files = pond.getFiles();
+                    const uploadPromises = files.map(fileItem => {
+                        const picFormData = new FormData();
+                        picFormData.append('fileName', fileItem.file);
+
+                        return axios.post(`/TickitEasy/admin/api/productPhoto/${productID}`, picFormData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
+                    });
+
+                    return Promise.all(uploadPromises);
+                })
+                .then(() => {
+                    Swal.fire({
+                        position: 'center',
+                        icon: "success",
+                        title: "商品新增成功",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    addProductForm.reset();
+                    pond.removeFiles();
+                    imagePreviewContainer.innerHTML = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('新增失敗，請稍後再試。');
+                })
+                .finally(() => {
+                    addProductBtn.disabled = false;
+                });
+        }
+
+        addProductForm.addEventListener('submit', function (event) {
+            event.preventDefault(); 
+
+            let formData = {
+                productName: document.querySelector('[name="productName"]').value.trim(),
+                categoryId: document.querySelector('[name="categoryId"]').value,
+                price: document.querySelector('[name="price"]').value,
+                stock: document.querySelector('[name="stock"]').value
+            };
+
+            let errors = validate(formData, constraints, { fullMessages: false });
+
+            if (errors) {
+                showErrors(errors);
+            } else {
+                submitForm();
+            }
+        });
+
+        // 圖片預覽
+        document.querySelector('input[name="imageFile"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'img-thumbnail mt-2';
+                    img.style.maxWidth = '200px';
+                    const container = document.getElementById('imagePreviewContainer');
+                    container.innerHTML = '';
+                    container.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 示範輸入
+        document.getElementById("autofillBtn").addEventListener("click", function () {
+            document.getElementsByName("productName")[0].value = "你的名字";
+            document.getElementsByName("productDesc")[0].value = "你的名字小說周邊商品";
+            document.getElementsByName("categoryId")[0].value = "3";
+            document.getElementsByName("tagId")[0].value = "5";
+            document.getElementsByName("price")[0].value = "200";
+            document.getElementsByName("stock")[0].value = "100";
+        });
+
+    });
+</script>
 </body>
 
 </html>

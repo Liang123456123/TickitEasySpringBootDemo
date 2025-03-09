@@ -217,6 +217,15 @@ function setNotification() {
 
 // 收藏功能
 function toggleFavorite() {
+	
+	const jwtToken = localStorage.getItem('jwtToken');
+
+	    // 如果使用者沒有登入，直接跳轉到登入頁面
+	    if (!jwtToken) {
+	        window.location.href = '/TickitEasy/login';
+	        return;  // 直接 return，不要發送請求
+	    }
+	
     axios.post(`/TickitEasy/user/api/product/favorite/${productID}`, {}, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` }
     })

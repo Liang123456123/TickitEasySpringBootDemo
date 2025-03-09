@@ -39,41 +39,45 @@ public class UserProdFavoritesService {
 	            ));
 	}
 
-	
-	
 	// 處理收藏/取消收藏
-    @Transactional
-    public Map<String, String> toggleFavorite(Member member, Integer productID) {
-        Map<String, String> result = new HashMap<>();
-        try {
-            // 先查找商品是否存在
-            ProductEntity product = productRepo.findById(productID)
-                .orElseThrow(() -> new RuntimeException("商品不存在"));
-                
-            Optional<ProdFavoritesEntity> existingFavorite = 
-                prodFavoritesRepo.findByMemberIDAndProductID(member.getMemberID(), productID);
+	@Transactional
+	public Map<String, String> toggleFavorite(Member member, Integer productID) {
+	    Map<String, String> result = new HashMap<>();
+	    try {
+	        // 先查找商品是否存在
+	        ProductEntity product = productRepo.findById(productID)
+	            .orElseThrow(() -> new RuntimeException("商品不存在"));
+	            
+	        Optional<ProdFavoritesEntity> existingFavorite = 
+	            prodFavoritesRepo.findByMemberIDAndProductID(member.getMemberID(), productID);
 
-            if (existingFavorite.isPresent()) {
-                // 更新收藏狀態
-                ProdFavoritesEntity favorite = existingFavorite.get();
-                int newFavoriteCount = (favorite.getFavoriteCount() == 1) ? 0 : 1;
-                prodFavoritesRepo.updateFavoriteCount(member.getMemberID(), productID, newFavoriteCount);
-                result.put("message", newFavoriteCount == 1 ? "加入收藏" : "取消收藏");
-            } else {
-                // 新增收藏（使用完整的實體）
-                ProdFavoritesEntity newFavorite = new ProdFavoritesEntity(member, product);
-                prodFavoritesRepo.save(newFavorite);
-                result.put("message", "已加入收藏");
-            }
-            
-            return result;
-        } catch (Exception e) {
-            result.put("error", e.getMessage());
-            return result;
-        }
-    }
+	        if (existingFavorite.isPresent()) {
+	            // 更新收藏狀態
+	            ProdFavoritesEntity favorite = existingFavorite.get();
+	            int newFavoriteCount = (favorite.getFavoriteCount() == 1) ? 0 : 1;
+	            prodFavoritesRepo.updateFavoriteCount(member.getMemberID(), productID, newFavoriteCount);
+	            result.put("message", newFavoriteCount == 1 ? "加入收藏" : "取消收藏");
 
- // 處理補貨通知設定
+	            // 檢查是否需要刪除記錄
+	            if (newFavoriteCount == 0 && favorite.getNotifyStatus() == 0) {
+	                prodFavoritesRepo.deleteIfCountAndNotifyAreZero(member.getMemberID(), productID);
+	            }
+	        } else {
+	            // 新增收藏（使用完整的實體）
+	            ProdFavoritesEntity newFavorite = new ProdFavoritesEntity(member, product);
+	            prodFavoritesRepo.save(newFavorite);
+	            result.put("message", "已加入收藏");
+	        }
+	        
+	        return result;
+	    } catch (Exception e) {
+	        result.put("error", e.getMessage());
+	        return result;
+	    }
+	}
+	
+
+	// 處理補貨通知設定
     @Transactional
     public Map<String, String> setNotification(Member member, Integer productID) {
         Map<String, String> result = new HashMap<>();

@@ -49,6 +49,15 @@ public interface ProdFavoritesRepo extends JpaRepository<ProdFavoritesEntity, Pr
     void updateNotifyStatus(@Param("memberID") Integer memberID, 
                           @Param("productID") Integer productID, 
                           @Param("notifyStatus") Integer notifyStatus);
+    
+    // 刪除商品收藏表中收藏和補貨狀態都為0的狀況
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM ProdFavoritesEntity f " +
+           "WHERE f.favoriteCount = 0 AND f.notifyStatus = 0 " +
+           "AND f.member.memberID = :memberID AND f.product.productID = :productID")
+    void deleteIfCountAndNotifyAreZero(@Param("memberID") Integer memberID, @Param("productID") Integer productID);
 
+    
 
 }

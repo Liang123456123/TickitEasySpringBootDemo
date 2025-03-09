@@ -4,12 +4,14 @@ package com.eeit87t3.tickiteasy.product.entity;
  * @author Liang123456123
  */
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.eeit87t3.tickiteasy.categoryandtag.entity.CategoryEntity;
 import com.eeit87t3.tickiteasy.categoryandtag.entity.TagEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -63,6 +66,10 @@ public class ProductEntity {
 	@Column(name = "createdDate")
 	@CreationTimestamp
 	private LocalDateTime createdDate;
+	
+	//刪除商品時，一併刪除商品副圖
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	private List<ProductPhotoEntity> productPhotos;
 
 	public ProductEntity() {
 	}
