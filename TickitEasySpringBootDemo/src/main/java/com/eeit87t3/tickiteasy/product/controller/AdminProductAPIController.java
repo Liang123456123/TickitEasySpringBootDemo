@@ -54,7 +54,6 @@ public class AdminProductAPIController {
     
     // 修改商品狀態
     @PutMapping("/{productID}/status")
-    @ResponseBody
     public ResponseEntity<?> editProductStatusByID(@PathVariable("productID") int productID,
                                                    @RequestBody ProductEntity updatedProduct) {
         try {
@@ -72,7 +71,6 @@ public class AdminProductAPIController {
     
     // 修改商品
     @PutMapping("/{productID}")
-    @ResponseBody
     public ResponseEntity<?> editProductByID(@PathVariable("productID") int productID,
     		@ModelAttribute ProductDTO productDTO,
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile){
@@ -89,7 +87,6 @@ public class AdminProductAPIController {
     
     // 刪除商品
     @DeleteMapping("/{productID}")
-    @ResponseBody
     public ResponseEntity<?> deleteProduct(@PathVariable("productID") int productID) throws IOException {
         try {
             productService.deleteProductById(productID);
@@ -101,7 +98,6 @@ public class AdminProductAPIController {
     
     // 新增商品
     @PostMapping
-    @ResponseBody
     public ResponseEntity<?> createProduct(
             @ModelAttribute ProductDTO productDTO,
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
