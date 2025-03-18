@@ -3,7 +3,6 @@ package com.eeit87t3.tickiteasy.product.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eeit87t3.tickiteasy.product.entity.ProductCartItemEntity;
 import com.eeit87t3.tickiteasy.product.entity.ProductEntity;
 import com.eeit87t3.tickiteasy.product.service.UserProductService;
 
@@ -26,8 +25,6 @@ public class UserProductAPIController {
 	
 	@Autowired
 	private UserProductService userProductService;
-	
-
 	
 	//前台首頁查詢商品頁面
 	@GetMapping
@@ -78,26 +75,4 @@ public class UserProductAPIController {
                 .body("Error fetching recommended products: " + e.getMessage());
         }
     }
-    
-    
-    //新增商品到購物車
-    @PostMapping
-    public ResponseEntity<ProductCartItemEntity> addToCart(@RequestParam Integer productID, @RequestParam Integer quantity) {
-        try {
-        	ProductCartItemEntity cartItem = userProductService.addToCart(productID, quantity);
-            return ResponseEntity.ok(cartItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    //修改購物車商品數量
-    @PutMapping
-    public ResponseEntity<ProductCartItemEntity> updateCartItem(@RequestBody ProductCartItemEntity cartItem, @RequestParam Integer newQuantity) {
-    	ProductCartItemEntity updatedItem = userProductService.updateCartItemQuantity(cartItem, newQuantity);
-        return ResponseEntity.ok(updatedItem);
-    }
-    
-    
-
 }

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eeit87t3.tickiteasy.product.dto.ProductDTO;
-import com.eeit87t3.tickiteasy.product.entity.ProductCartItemEntity;
 import com.eeit87t3.tickiteasy.product.entity.ProductEntity;
 import com.eeit87t3.tickiteasy.product.entity.ProductPhotoEntity;
 import com.eeit87t3.tickiteasy.product.repository.ProductPhotoRepo;
@@ -117,34 +116,4 @@ public class UserProductService {
         
         return new ArrayList<>();
     }
-    
-	
-    //加入購物車
-    public ProductCartItemEntity addToCart(Integer productID, Integer quantity) {
-        Optional<ProductEntity> productOptional = productRepo.findById(productID);
-        
-        if (productOptional.isPresent()) {
-            ProductEntity product = productOptional.get();
-            
-            ProductCartItemEntity cartItem = new ProductCartItemEntity();
-            cartItem.setProductID(product.getProductID());
-            cartItem.setProductName(product.getProductName());
-            cartItem.setProductPic(product.getProductPic());
-            cartItem.setPrice(product.getPrice());
-            cartItem.setQuantity(quantity);
-            
-            return cartItem;
-        } else {
-            throw new RuntimeException("商品不存在");
-        }
-    }
-    
-    //修改購物車商品數量
-    public ProductCartItemEntity updateCartItemQuantity(ProductCartItemEntity cartItem, Integer newQuantity) {
-        cartItem.setQuantity(newQuantity);
-        return cartItem;
-    }
-    
-    
-
 }

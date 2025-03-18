@@ -146,33 +146,7 @@
         }
     </style>
     <title>周邊商品</title>
-    <script>
-    $(document).ready(function () {
-        // 點擊主圖放大
-        $(document).on('click', '#mainImage', function() {
-            const imageUrl = $(this).attr('src');
-            const modalHtml = `
-                <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg ">
-                        <div class="modal-content">
-                            <div class="modal-header border-0" >
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <img src="${imageUrl}" class="img-fluid" alt="放大圖片">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            $('body').append(modalHtml);
-            $('#imageModal').modal('show');
-            $('#imageModal').on('hidden.bs.modal', function () {
-                $(this).remove();
-            });
-        });
-    });
-</script>
+    
 
 </head>
 

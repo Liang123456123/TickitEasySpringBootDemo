@@ -195,13 +195,15 @@
             }
 
             cartItems.forEach(item => {
+                console.log("商品圖片：", item.productPic); // 查看圖片路徑
                 const itemElement = document.createElement('div'); // 建立每個商品的元素
                 itemElement.className = 'row border border-secondary bg-light rounded p-3';
                
                 itemElement.innerHTML = `
                     <div class="col-2 p-0">
                         <div class="ratio ratio-16x9">
-                            <img class="event-pic rounded object-fit-cover" src="/TickitEasy${item.productPic}" alt="${item.productName}">
+                            // <img class="event-pic rounded object-fit-cover" src="/TickitEasy${item.productPic}" alt="${item.productName}">
+                            <img class="event-pic rounded object-fit-cover" src="${item.productPic}" alt="${item.productName}">
                         </div>
                     </div>
                     <div class="col-4 d-flex flex-column gap-1 align-items-center justify-content-center">
@@ -258,23 +260,10 @@
 
         // 更新購物車中的商品
         function updateCartItem(item) {
-            axios.put('/TickitEasy/user/api/product', {
-                productID: item.productID,
-                quantity: item.quantity
-            }, {
-                params: {
-                    newQuantity: item.quantity
-                }
-            })
-                .then(() => {
-                    localStorage.setItem('cart', JSON.stringify(cartItems)); // 更新 localStorage
-                    renderCart(); // 重新渲染購物車
-                    updateTotals(); // 更新總數量和金額
-                })
-                .catch(error => {
-                    console.error('更新購物車失敗:', error.response.data); // 輸出錯誤資訊
-                    alert('加入購物車失敗，請稍後再試'); // 提示會員
-                });
+        localStorage.setItem('cart', JSON.stringify(cartItems)); 
+        // 更新 localStorage
+        renderCart(); // 重新渲染購物車
+        updateTotals(); // 更新總數量和金額
         }
 
         // 刪除商品

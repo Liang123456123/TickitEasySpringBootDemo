@@ -5,6 +5,7 @@
 	
     <meta th:replace="~{commons/adminHead}">
 	<title>商品圖表分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 	<!-- 引入 Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -69,9 +70,8 @@
 
     <script>
          // 獲取各標籤的商品庫存數並生成圓餅圖
-        fetch('/TickitEasy/admin/api/product/tag-stock')
-            .then(response => response.json())
-            .then(data => {
+        axios.get('/TickitEasy/admin/api/product/tag-stock').then(response =>  {
+                const data = response.data;
                 const labels = Object.keys(data); // 標籤名稱
                 const values = Object.values(data); // 庫存數
 
@@ -116,9 +116,8 @@
             .catch(error => console.error('獲取商品庫存數據時出錯：', error));
 
         // 獲取每個商品的收藏次數並生成長條圖
-        fetch('/TickitEasy/user/api/product/product-favorites')
-            .then(response => response.json())
-            .then(data => {
+        axios.get('/TickitEasy/user/api/product/product-favorites').then(response => {
+                const data = response.data;
                 const labels = Object.keys(data); // 商品名稱
                 const values = Object.values(data); // 收藏次數
 

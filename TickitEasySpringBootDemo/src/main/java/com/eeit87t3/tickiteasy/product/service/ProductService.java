@@ -190,7 +190,7 @@ public class ProductService {
             try {
                 productRepo.deleteById(productID);
             } catch (Exception e) {
-            	System.out.println("從資料庫刪除商品時發生錯誤: " + e.getMessage()); //商品Id被訂單FK和商品圖片FK綁住
+            	System.out.println("從資料庫刪除商品時發生錯誤: " + e.getMessage()); //商品Id被訂單FK綁住
             	e.printStackTrace(); 
                 throw new RuntimeException("刪除商品失敗", e);
             }

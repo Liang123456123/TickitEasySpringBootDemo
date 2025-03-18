@@ -1,7 +1,31 @@
 $(document).ready(function () {
     loadProductDetail();
     loadRecommendProducts();  // 加載推薦商品
-	});
+    // 點擊主圖放大（#mainImage 點擊觸發 Bootstrap Modal）
+    $(document).on('click', '#mainImage', function() {
+        const imageUrl = $(this).attr('src');
+        const modalHtml = `
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg ">
+                    <div class="modal-content">
+                        <div class="modal-header border-0" >
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${imageUrl}" class="img-fluid" alt="放大圖片">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+        $('#imageModal').modal('show');
+        $('#imageModal').on('hidden.bs.modal', function () {
+            $(this).remove();
+        });
+    });
+});
+
 
 function loadProductDetail() {
     axios.get(`/TickitEasy/user/api/product/${productID}`)
@@ -158,62 +182,50 @@ function setNotification() {
 }
 
 // 加入購物車
-    function addToCart(buyNow) {
-        const quantity = parseInt(document.getElementById('quantityInput').value, 10);
-        if (isNaN(quantity) || quantity < 1) {
-            alert('請輸入大於0的數量');
-            return;
-        }
 
-        // 使用 axios 向後端发送 POST 請求
-        axios.post('/TickitEasy/user/api/product', null, {
-            params: {
-                productID: productID,  
-                quantity: quantity
-            }
-        })
-        .then(response => {
-            const cartItem = response.data;  // 從後端獲取更新後的購物車數據
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+function addToCart(buyNow) {
+    const quantity = parseInt(document.getElementById('quantityInput').value, 10);
+    if (isNaN(quantity) || quantity < 1) {
+        alert('請輸入大於0的數量');
+        return;
+    }
 
-            // 檢查購物車中是否已存在該商品
-            const existingItemIndex = cart.findIndex(item => item.productID === cartItem.productID);
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-            if (existingItemIndex > -1) {
-                // 更新商品數量
-                cart[existingItemIndex].quantity += quantity;
-            } else {
-                // 將新商品加到購物車
-                cart.push(cartItem);
-            }
+    // 檢查購物車中是否已存在該商品
+    const existingItemIndex = cart.findIndex(item => item.productID === productID);
 
-            // 更新 localStorage 中的購物車資料
-            localStorage.setItem('cart', JSON.stringify(cart));
-			// 判斷是跳轉到購物車頁面還是顯示提示訊息
-            if (buyNow) {
-                window.location.href = '/TickitEasy/user/cart';  // 跳轉到購物車頁面
-            } 				else {
-				            // 如果是加入購物車，顯示 SweetAlert2 提示訊息
-				            Swal.fire({
-				                position: 'center',
-				                icon: 'success',
-				                title: '商品已加入購物車',
-				                showConfirmButton: false,
-				                timer: 1500  
-				            });
-				        }
-				    })
-				    .catch(error => {
-				        console.error('加入購物車失敗:', error);  
-				        Swal.fire({
-				            position: 'center',
-				            icon: 'error',
-				            title: '加入購物車失敗',
-				            text: '請稍後再試',
-				            showConfirmButton: true
-				        });
-				    });
-				}
+    if (existingItemIndex > -1) {
+        // 更新商品數量
+        cart[existingItemIndex].quantity += quantity;
+    } else {
+        // **存完整商品資訊，讓購物車頁面可以讀取**
+        const cartItem = {
+            productID: productID,
+            productName: document.getElementById("productName").innerText, 
+            productPic: document.getElementById("mainImage").src, 
+            price: parseFloat(document.getElementById("productPrice").innerText),
+            quantity: quantity
+        };
+        cart.push(cartItem);
+    }
+
+    // 更新 localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // 判斷是跳轉到購物車頁面還是顯示提示訊息
+    if (buyNow) {
+        window.location.href = '/TickitEasy/user/cart';
+    } else {
+        Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: '商品已加入購物車',
+            showConfirmButton: false,
+            timer: 1500  
+        });
+    }
+}
 
 // 收藏功能
 function toggleFavorite() {
